@@ -34,6 +34,9 @@ app.post('/webhook', async (req, res) => {
         }
     });
 
+    console.log(req.body.message);
+    console.log(req.body);
+
     const imageResponse = await openai.images.generate({
         model: "dall-e-3",
         prompt: req.body.message,
