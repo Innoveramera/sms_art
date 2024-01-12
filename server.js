@@ -8,8 +8,8 @@ const path = require('path');
 const fs = require('fs');
 
 // Middleware to parse JSON bodies
-app.use(express.json());
 app.use(express.static('public'));
+app.use(express.urlencoded({ extended: true }));
 
 app.get('/message', (req, res) => {
     fs.readFile('message.txt', 'utf8', (err, data) => {
@@ -26,6 +26,7 @@ app.get('/message', (req, res) => {
 app.post('/webhook', (req, res) => {
     // Extract the object from the request's body
     const sms = req.body.message;
+    console.log(req.body);
     getResponse(sms);
 
     // Send a response back to the webhook source
