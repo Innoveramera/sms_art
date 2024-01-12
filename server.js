@@ -69,7 +69,7 @@ async function getResponse (sms) {
         writer.on('error', reject);
     });
 
-    message = "Skicka ett SMS med ditt önskemål av bild till 076-686 04 71 ::: (Nu visas \"" + req.body.message + "\")";
+    message = "Skicka ett SMS med ditt önskemål av bild till 076-686 04 71 ::: (Nu visas \"" + sms + "\")";
     fs.writeFile('message.txt', message, (err) => {
         if (err) {
             console.error('Error writing to file:', err);
