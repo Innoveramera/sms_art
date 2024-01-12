@@ -69,7 +69,7 @@ async function getResponse (sms) {
         writer.on('error', reject);
     });
 
-    message = "Skicka ett SMS som i text beskriver vad du vill se till " + process.env.ELKS_NR + " (Nu visas \"" + sms + "\")";
+    message = "Skicka ett SMS som i text beskriver vad du vill se till " + process.env.ELKS_NR + " \n(Nu visas \"" + sms + "\")";
     fs.writeFile('message.txt', message, (err) => {
         if (err) {
             console.error('Error writing to file:', err);
