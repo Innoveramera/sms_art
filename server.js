@@ -23,8 +23,16 @@ app.get('/message', (req, res) => {
 });
 
 // Define the route for your webhook
-app.post('/webhook', async (req, res) => {
+app.post('/webhook', (req, res) => {
+    // Extract the object from the request's body
+    const sms = req.body.message;
+    getResponse(sms);
 
+    // Send a response back to the webhook source
+    res.status(200).send();
+});
+
+async function getResponse (sms) {
     var message = "Behandlar inkommmande SMS...";
     fs.writeFile('message.txt', message, (err) => {
         if (err) {
@@ -34,12 +42,11 @@ app.post('/webhook', async (req, res) => {
         }
     });
 
-    console.log(req.body.message);
-    console.log(req.body);
+    console.log(sms);
 
     const imageResponse = await openai.images.generate({
         model: "dall-e-3",
-        prompt: req.body.message,
+        prompt: sms,
         n: 1,
         size: "1792x1024",
     });
@@ -69,10 +76,7 @@ app.post('/webhook', async (req, res) => {
             return;
         }
     });
-
-    // Send a response back to the webhook source
-    res.status(200).send();
-});
+}
 
 // Start the server
 const PORT = 3333;
