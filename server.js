@@ -25,8 +25,13 @@ app.post('/webhook', (req, res) => {
     // Extract the object from the request's body
     const sms = req.body.message;
     
-    const [cronSyntax, ...messageParts] = sms.split(' ');
-    const message = messageParts.join(' ');
+    const parts = sms.split('|');
+    if (parts.length !== 2) {
+        return res.status(400).send('Invalid format. Use "<CRON SYNTAX> | <MESSAGE>".');
+    }
+
+    const cronSyntax = parts[0].trim();
+    const message = parts[1].trim();
 
     console.log('Received SMS:', sms);
     console.log('Parsed cron syntax:', cronSyntax);
