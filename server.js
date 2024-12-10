@@ -55,7 +55,7 @@ app.post('/webhook', (req, res) => {
             const auth = Buffer.from(username + ":" + password).toString("base64");
 
             let data = {
-                from: "Remind.me",
+                from: "RemindMe",
                 to: from,
                 message: message
             }
