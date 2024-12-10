@@ -60,6 +60,8 @@ app.post('/webhook', (req, res) => {
                 message: message
             }
 
+            console.log('Sending SMS:', data);
+        
             data = new URLSearchParams(data);
             data = data.toString();
 
