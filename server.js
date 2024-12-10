@@ -5,6 +5,8 @@ const fs = require('fs');
 const cron = require('node-cron');
 const cronParser = require('cron-parser');
 
+const reminders = [];
+
 // Middleware to parse JSON bodies
 app.use(express.static('public'));
 app.use(express.urlencoded({ extended: true }));
