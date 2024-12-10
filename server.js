@@ -55,7 +55,7 @@ app.post('/webhook', (req, res) => {
 
         res.send(`Reminder scheduled: "${message}" with cron "${cronSyntax}"`);
     } catch (err) {
-        res.status(200).send('Invalid cron syntax. Please check and try again.');
+        res.status(200).send('Error parsing cron syntax', err);
     }
 });
 
