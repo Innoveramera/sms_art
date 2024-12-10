@@ -25,7 +25,7 @@ app.post('/webhook', (req, res) => {
     console.log(req.body);
 
     // Send a response back to the webhook source
-    res.status(200).send(sms);
+    res.status(200).send("ACK");
 });
 
 // Start the server
