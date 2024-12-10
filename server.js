@@ -28,6 +28,10 @@ app.post('/webhook', (req, res) => {
     const [cronSyntax, ...messageParts] = sms.split(' ');
     const message = messageParts.join(' ');
 
+    console.log('Received SMS:', sms);
+    console.log('Parsed cron syntax:', cronSyntax);
+    console.log('Parsed message:', message);
+
     try {
         // Validate the cron syntax
         cronParser.parseExpression(cronSyntax);
@@ -46,7 +50,7 @@ app.post('/webhook', (req, res) => {
 
         res.send(`Reminder scheduled: "${message}" with cron "${cronSyntax}"`);
     } catch (err) {
-        res.status(400).send('Invalid cron syntax. Please check and try again.');
+        res.status(200).send('Invalid cron syntax. Please check and try again.');
     }
 });
 
