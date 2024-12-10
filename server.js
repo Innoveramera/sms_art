@@ -29,7 +29,7 @@ app.post('/webhook', (req, res) => {
 });
 
 // Start the server
-const PORT = 3333;
+const PORT = 3334;
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
