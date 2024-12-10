@@ -27,7 +27,7 @@ app.post('/webhook', (req, res) => {
     // Extract the object from the request's body
     const sms = req.body.message;
     const from = req.body.from;
-    
+
     const parts = sms.split('|');
     if (parts.length !== 2) {
         return res.status(400).send('Invalid format. Use "<CRON SYNTAX> | <MESSAGE>".');
@@ -48,13 +48,29 @@ app.post('/webhook', (req, res) => {
         reminders.push({ from, cronSyntax, message });
 
         // Schedule the reminder
-        // cron.schedule(cronSyntax, () => {
-        //     client.messages.create({
-        //         body: message,
-        //         from: 'your_twilio_number',
-        //         to: from
-        //     });
-        // });
+        cron.schedule(cronSyntax, () => {
+            const username = "u65e77ddc6ccb7e725c4334bae308aecd";
+            const password = "A771270B62CD8A3211F4D5DDAB06B3E8";
+            const auth = Buffer.from(username + ":" + password).toString("base64");
+
+            let data = {
+                from: "Remind.me",
+                to: from,
+                message: message
+            }
+
+            data = new URLSearchParams(data);
+            data = data.toString();
+
+            fetch("https://api.46elks.com/a1/sms", {
+                method: "post",
+                body: data,
+                headers: { "Authorization": "Basic " + auth }
+            })
+                .then(res => res.json())
+                .then(json => console.log(json))
+                .catch(err => console.log(err))
+        });
 
         res.status(200).send(`Reminder scheduled: "${message}" with cron "${cronSyntax}"`);
     } catch (err) {
