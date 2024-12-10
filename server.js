@@ -2,6 +2,8 @@ require('dotenv').config();
 const express = require('express');
 const app = express();
 const fs = require('fs');
+const cron = require('node-cron');
+const cronParser = require('cron-parser');
 
 // Middleware to parse JSON bodies
 app.use(express.static('public'));
@@ -22,10 +24,30 @@ app.get('/message', (req, res) => {
 app.post('/webhook', (req, res) => {
     // Extract the object from the request's body
     const sms = req.body.message;
-    console.log(req.body);
+    
+    const [cronSyntax, ...messageParts] = sms.split(' ');
+    const message = messageParts.join(' ');
 
-    // Send a response back to the webhook source
-    res.status(200).send("ACK");
+    try {
+        // Validate the cron syntax
+        cronParser.parseExpression(cronSyntax);
+
+        // Store the reminder
+        reminders.push({ from, cronSyntax, message });
+
+        // Schedule the reminder
+        // cron.schedule(cronSyntax, () => {
+        //     client.messages.create({
+        //         body: message,
+        //         from: 'your_twilio_number',
+        //         to: from
+        //     });
+        // });
+
+        res.send(`Reminder scheduled: "${message}" with cron "${cronSyntax}"`);
+    } catch (err) {
+        res.status(400).send('Invalid cron syntax. Please check and try again.');
+    }
 });
 
 // Start the server
