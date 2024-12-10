@@ -26,6 +26,7 @@ app.get('/message', (req, res) => {
 app.post('/webhook', (req, res) => {
     // Extract the object from the request's body
     const sms = req.body.message;
+    const from = req.body.from;
     
     const parts = sms.split('|');
     if (parts.length !== 2) {
