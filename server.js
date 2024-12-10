@@ -53,9 +53,10 @@ app.post('/webhook', (req, res) => {
         //     });
         // });
 
-        res.send(`Reminder scheduled: "${message}" with cron "${cronSyntax}"`);
+        res.status(200).send(`Reminder scheduled: "${message}" with cron "${cronSyntax}"`);
     } catch (err) {
-        res.status(200).send('Error parsing cron syntax', err);
+        console.error('Error parsing cron syntax:', err.message);
+        res.status(400).send(`Error parsing cron syntax: ${err.message}`);
     }
 });
 
