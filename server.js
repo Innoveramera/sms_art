@@ -4,7 +4,6 @@ const app = express();
 const fs = require('fs');
 const chrono = require('chrono-node');
 const moment = require('moment-timezone');
-const cronParser = require('cron-parser');
 const fetch = require('node-fetch');
 require('dotenv').config();
 
