@@ -2,7 +2,8 @@ require('dotenv').config();
 const express = require('express');
 const app = express();
 const fs = require('fs');
-const cron = require('node-cron');
+const chrono = require('chrono-node');
+const moment = require('moment-timezone');
 const cronParser = require('cron-parser');
 const fetch = require('node-fetch');
 require('dotenv').config();
@@ -30,45 +31,46 @@ app.post('/webhook', (req, res) => {
     const sms = req.body.message;
     const from = req.body.from;
 
+    const timezone = 'Europe/Stockholm';
     console.log('Received SMS:', sms);
-
-    const parts = sms.split('|');
-    if (parts.length !== 2) {
-        return res.status(400).send('Invalid format. Use "<CRON SYNTAX> | <MESSAGE>".');
-    }
-
-    const cronSyntax = parts[0].trim();
-    const message = parts[1].trim();
-
-
-    console.log('Received SMS:', sms);
-    console.log('Parsed cron syntax:', cronSyntax);
-    console.log('Parsed message:', message);
 
     try {
-        const interval = cronParser.parseExpression(cronSyntax, { timezone: 'Europe/Stockholm' });
-        const nextDate = interval.next().toDate(); // This will now respect Sweden's timezone
-
-        console.log(`Reminder scheduled for Sweden time: ${nextDate.toLocaleString('sv-SE', { timeZone: 'Europe/Stockholm' })}`);
-        console.log(`Reminder scheduled in UTC: ${nextDate}`);
-
-
-        // Calculate the delay in milliseconds
-        const delay = nextDate.getTime() - Date.now();
-
-        if (delay <= 0) {
-            return res.status(200).send('Invalid cron syntax or time in the past.');
+        // Parse the date/time from the message
+        const parsedDate = chrono.parseDate(sms, new Date(), { forwardDate: true });
+        if (!parsedDate) {
+            return res.status(200).send('Could not understand the date/time in your message.');
         }
 
-        // Schedule the SMS to be sent
+        // Adjust the parsed date to the correct timezone
+        const adjustedDate = moment(parsedDate).tz(timezone);
+
+        // Extract the remaining message content after the date/time
+        const parsedDetails = chrono.parse(sms);
+        const remainingMessage = sms.replace(parsedDetails[0].text, '').trim();
+
+        if (!remainingMessage) {
+            return res.status(200).send('Could not understand the reminder content.');
+        }
+
+        console.log(`Parsed Reminder:`);
+        console.log(`- Time: ${adjustedDate.format('YYYY-MM-DD HH:mm:ss')} (${timezone})`);
+        console.log(`- Message: ${remainingMessage}`);
+
+        // Calculate the delay
+        const delay = adjustedDate.toDate().getTime() - Date.now();
+        if (delay <= 0) {
+            return res.status(200).send('The specified time is in the past.');
+        }
+
+        // Schedule the reminder
         setTimeout(() => {
-            sendSms({ to: from, message });
+            sendSms({ to: from, message: remainingMessage });
         }, delay);
 
-        res.status(200).send(`Reminder scheduled: "${message}" for ${nextDate}.`);
+        res.status(200).send(`Reminder booked to ${nextDate}`);
     } catch (err) {
         console.error('Error parsing cron syntax:', err.message);
-        res.status(400).send(`Error parsing cron syntax: ${err.message}`);
+        res.status(200).send(`Error parsing cron syntax: ${err.message}`);
     }
 });
 
