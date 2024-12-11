@@ -24,6 +24,29 @@ app.get('/message', (req, res) => {
     });
 });
 
+const fs = require('fs');
+
+// Handle form submission
+app.post('/submit-interest', (req, res) => {
+    const { name, email } = req.body;
+    const data = { name, email, timestamp: new Date() };
+
+    // Append data to a JSON file
+    fs.readFile('submissions.json', (err, fileData) => {
+        const submissions = err ? [] : JSON.parse(fileData);
+        submissions.push(data);
+
+        fs.writeFile('submissions.json', JSON.stringify(submissions, null, 2), (err) => {
+            if (err) {
+                console.error('Error saving submission:', err);
+                return res.status(500).send('Error saving your submission.');
+            }
+            res.send('Tack för din anmälan! Vi hör av oss snart.');
+        });
+    });
+});
+
+
 // Define the route for your webhook
 app.post('/webhook', (req, res) => {
     // Extract the object from the request's body
