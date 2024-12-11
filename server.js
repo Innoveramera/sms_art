@@ -5,6 +5,7 @@ const fs = require('fs');
 const cron = require('node-cron');
 const cronParser = require('cron-parser');
 const fetch = require('node-fetch');
+require('dotenv').config();
 
 const reminders = [];
 
@@ -50,12 +51,10 @@ app.post('/webhook', (req, res) => {
 
         // Schedule the reminder
         cron.schedule(cronSyntax, () => {
-            const username = "u65e77ddc6ccb7e725c4334bae308aecd";
-            const password = "A771270B62CD8A3211F4D5DDAB06B3E8";
-            const auth = Buffer.from(username + ":" + password).toString("base64");
+            const auth = Buffer.from(`${process.env.SMS_USERNAME}:${process.env.SMS_PASSWORD}`).toString("base64");
 
             let data = {
-                from: "RemindMe",
+                from: process.env.SMS_FROM,
                 to: from,
                 message: message
             }
@@ -64,7 +63,6 @@ app.post('/webhook', (req, res) => {
         
             data = new URLSearchParams(data);
             data = data.toString();
-
                 
             fetch("https://api.46elks.com/a1/sms", {
                 method: "post",
@@ -84,7 +82,7 @@ app.post('/webhook', (req, res) => {
 });
 
 // Start the server
-const PORT = 3334;
+const PORT = process.env.PORT || 3334;
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
