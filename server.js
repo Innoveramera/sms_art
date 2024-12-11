@@ -24,8 +24,6 @@ app.get('/message', (req, res) => {
     });
 });
 
-const fs = require('fs');
-
 // Handle form submission
 app.post('/submit-interest', (req, res) => {
     const { name, email } = req.body;
