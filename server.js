@@ -47,9 +47,11 @@ app.post('/webhook', (req, res) => {
 
     try {
         const interval = cronParser.parseExpression(cronSyntax, { timezone: 'Europe/Stockholm' });
-        const nextDate = interval.next().toDate(); // Get the next execution date as a Date object
+        const nextDate = interval.next().toDate(); // This will now respect Sweden's timezone
 
-        console.log(`Reminder scheduled for: ${nextDate}`);
+        console.log(`Reminder scheduled for Sweden time: ${nextDate.toLocaleString('sv-SE', { timeZone: 'Europe/Stockholm' })}`);
+        console.log(`Reminder scheduled in UTC: ${nextDate}`);
+
 
         // Calculate the delay in milliseconds
         const delay = nextDate.getTime() - Date.now();
