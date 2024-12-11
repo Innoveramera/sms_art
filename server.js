@@ -31,7 +31,7 @@ app.post('/webhook', (req, res) => {
     const from = req.body.from;
 
     const timezone = 'Europe/Stockholm';
-    console.log('Received SMS:', sms);
+    console.log('Received SMS:', req.body);
 
     try {
         // Parse the date/time from the message
@@ -66,7 +66,7 @@ app.post('/webhook', (req, res) => {
             sendSms({ to: from, message: remainingMessage });
         }, delay);
 
-        res.status(200).send(`Reminder booked to ${nextDate}`);
+        res.status(200).send(`Reminder booked to ${adjustedDate}`);
     } catch (err) {
         console.error('Error parsing cron syntax:', err.message);
         res.status(200).send(`Error parsing cron syntax: ${err.message}`);
