@@ -46,7 +46,7 @@ app.post('/webhook', (req, res) => {
     console.log('Parsed message:', message);
 
     try {
-        const interval = cronParser.parseExpression(cronSyntax);
+        const interval = cronParser.parseExpression(cronSyntax, { timezone: 'Europe/Stockholm' });
         const nextDate = interval.next().toDate(); // Get the next execution date as a Date object
 
         console.log(`Reminder scheduled for: ${nextDate}`);
@@ -58,20 +58,10 @@ app.post('/webhook', (req, res) => {
             return res.status(200).send('Invalid cron syntax or time in the past.');
         }
 
-        // Schedule a one-time reminder
+        // Schedule the SMS to be sent
         setTimeout(() => {
-            const auth = Buffer.from(`${process.env.SMS_USERNAME}:${process.env.SMS_PASSWORD}`).toString('base64');
-            const data = new URLSearchParams({ from: process.env.SMS_FROM, to: from, message });
-
-            fetch("https://api.46elks.com/a1/sms", {
-                method: "post",
-                body: data.toString(),
-                headers: { Authorization: `Basic ${auth}` }
-            })
-                .then(response => response.json())
-                .then(json => console.log("SMS sent:", json))
-                .catch(err => console.error("Error sending SMS:", err));
-        }, delay); // Schedule for the delay duration
+            sendSms({ to: from, message });
+        }, delay);
 
         res.status(200).send(`Reminder scheduled: "${message}" for ${nextDate}.`);
     } catch (err) {
@@ -79,6 +69,21 @@ app.post('/webhook', (req, res) => {
         res.status(400).send(`Error parsing cron syntax: ${err.message}`);
     }
 });
+
+// Method to send an SMS using the 46elks API
+function sendSms({ to, message }) {
+    const auth = Buffer.from(`${process.env.SMS_USERNAME}:${process.env.SMS_PASSWORD}`).toString('base64');
+    const data = new URLSearchParams({ from: process.env.SMS_FROM, to, message });
+
+    fetch("https://api.46elks.com/a1/sms", {
+        method: "post",
+        body: data.toString(),
+        headers: { Authorization: `Basic ${auth}` }
+    })
+        .then(response => response.json())
+        .then(json => console.log("SMS sent:", json))
+        .catch(err => console.error("Error sending SMS:", err));
+}
 
 // Start the server
 const PORT = process.env.PORT || 3334;
