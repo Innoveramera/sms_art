@@ -30,6 +30,8 @@ app.post('/webhook', (req, res) => {
     const sms = req.body.message;
     const from = req.body.from;
 
+    console.log('Received SMS:', sms);
+
     const parts = sms.split('|');
     if (parts.length !== 2) {
         return res.status(400).send('Invalid format. Use "<CRON SYNTAX> | <MESSAGE>".');
