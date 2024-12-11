@@ -40,43 +40,40 @@ app.post('/webhook', (req, res) => {
     const cronSyntax = parts[0].trim();
     const message = parts[1].trim();
 
+
     console.log('Received SMS:', sms);
     console.log('Parsed cron syntax:', cronSyntax);
     console.log('Parsed message:', message);
 
     try {
-        // Validate the cron syntax
-        cronParser.parseExpression(cronSyntax);
+        const interval = cronParser.parseExpression(cronSyntax);
+        const nextDate = interval.next().toDate(); // Get the next execution date as a Date object
 
-        // Store the reminder
-        reminders.push({ from, cronSyntax, message });
+        console.log(`Reminder scheduled for: ${nextDate}`);
 
-        // Schedule the reminder
-        cron.schedule(cronSyntax, () => {
-            const auth = Buffer.from(`${process.env.SMS_USERNAME}:${process.env.SMS_PASSWORD}`).toString("base64");
+        // Calculate the delay in milliseconds
+        const delay = nextDate.getTime() - Date.now();
 
-            let data = {
-                from: process.env.SMS_FROM,
-                to: from,
-                message: message
-            }
+        if (delay <= 0) {
+            return res.status(200).send('Invalid cron syntax or time in the past.');
+        }
 
-            console.log('Sending SMS:', data);
-        
-            data = new URLSearchParams(data);
-            data = data.toString();
-                
+        // Schedule a one-time reminder
+        setTimeout(() => {
+            const auth = Buffer.from(`${process.env.SMS_USERNAME}:${process.env.SMS_PASSWORD}`).toString('base64');
+            const data = new URLSearchParams({ from: process.env.SMS_FROM, to: from, message });
+
             fetch("https://api.46elks.com/a1/sms", {
                 method: "post",
-                body: data,
-                headers: { "Authorization": "Basic " + auth }
+                body: data.toString(),
+                headers: { Authorization: `Basic ${auth}` }
             })
-                .then(res => res.json())
-                .then(json => console.log(json))
-                .catch(err => console.log(err))
-        });
+                .then(response => response.json())
+                .then(json => console.log("SMS sent:", json))
+                .catch(err => console.error("Error sending SMS:", err));
+        }, delay); // Schedule for the delay duration
 
-        res.status(200).send(`Reminder scheduled: "${message}" with cron "${cronSyntax}"`);
+        res.status(200).send(`Reminder scheduled: "${message}" for ${nextDate}.`);
     } catch (err) {
         console.error('Error parsing cron syntax:', err.message);
         res.status(400).send(`Error parsing cron syntax: ${err.message}`);
